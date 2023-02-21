@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="product", schema="stock_management")
+@Table(name="product")
 public class Product {
 	
 	@Id
