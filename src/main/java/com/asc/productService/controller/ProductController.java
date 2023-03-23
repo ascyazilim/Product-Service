@@ -1,7 +1,7 @@
 package com.asc.productService.controller;
 
 import com.asc.productService.enums.Language;
-import com.asc.productService.exception.enums.FriendlyMessageCode;
+import com.asc.productService.exception.enums.FriendlyMessageCodes;
 import com.asc.productService.exception.utils.FriendlyMessageUtils;
 import com.asc.productService.repository.entity.Product;
 import com.asc.productService.request.ProductCreateRequest;
@@ -32,8 +32,8 @@ class ProductController {
         log.debug("[{}][createProduct] -> response: {}", this.getClass().getSimpleName(), productResponse);
         return InternalApiResponse.<ProductResponse>builder()
                 .friendlyMessage(FriendlyMessage.builder()
-                        .title(FriendlyMessageUtils.getFriendlyMessage(language, FriendlyMessageCode.SUCCESS))
-                        .description(FriendlyMessageUtils.getFriendlyMessage(language, FriendlyMessageCode.PRODUCT_SUCCESSFULLY_CREATED))
+                        .title(FriendlyMessageUtils.getFriendlyMessage(language, FriendlyMessageCodes.SUCCESS))
+                        .description(FriendlyMessageUtils.getFriendlyMessage(language, FriendlyMessageCodes.PRODUCT_SUCCESSFULLY_CREATED))
                         .build())
                 .httpStatus(HttpStatus.CREATED)
                 .hasError(false)
@@ -41,6 +41,22 @@ class ProductController {
                 .build();
 
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/{language}/get/{productId}")
+    public InternalApiResponse<ProductResponse> getProduct(@PathVariable("language") Language language,
+                                                           @PathVariable("productId") Long productId){
+        log.debug("[{}][getProduct] -> request productId: {}", this.getClass().getSimpleName(), productId);
+        Product product = productRepositoryService.getProduct(language, productId);
+        ProductResponse productResponse = convertProductResponse(product);
+        log.debug("[{}][getProduct] -> response: {}", this.getClass().getSimpleName(), productResponse);
+        return InternalApiResponse.<ProductResponse>builder()
+                .httpStatus(HttpStatus.OK)
+                .hasError(false)
+                .payload(productResponse)
+                .build();
+    }
+
 
     private static ProductResponse convertProductResponse(Product product) {
         return ProductResponse.builder()

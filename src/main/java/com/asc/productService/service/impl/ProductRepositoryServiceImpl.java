@@ -1,11 +1,13 @@
 package com.asc.productService.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 
+import com.asc.productService.exception.exceptions.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.asc.productService.enums.Language;
-import com.asc.productService.exception.enums.FriendlyMessageCode;
+import com.asc.productService.exception.enums.FriendlyMessageCodes;
 import com.asc.productService.exception.exceptions.ProductNotCreatedException;
 import com.asc.productService.repository.ProductRepository;
 import com.asc.productService.repository.entity.Product;
@@ -37,15 +39,21 @@ public class ProductRepositoryServiceImpl implements IProductRepositoryService{
 			log.debug("[{}][createProduct] -> response: {}", this.getClass().getSimpleName(), productResponse);
 			return productResponse;
 		} catch (Exception exception) {
-			throw new ProductNotCreatedException(language, FriendlyMessageCode.PRODUCT_NOT_CREATED_EXCEPTION, "product request: " +productCreateRequest.toString());
+			throw new ProductNotCreatedException(language, FriendlyMessageCodes.PRODUCT_NOT_CREATED_EXCEPTION, "product request: " +productCreateRequest.toString());
 		}
 		
 	}
 
 	@Override
 	public Product getProduct(Language language, Long productId) {
-		// TODO Auto-generated method stub
-		return null;
+		log.debug("[{}][getProduct] -> request productId: {}", this.getClass().getSimpleName(), productId);
+		Product product = productRepository.getByProductIdAndDeletedFalse(productId);
+		if(Objects.isNull(product)){
+			throw new ProductNotFoundException(language, FriendlyMessageCodes.PRODUCT_NOT_FOUND_EXCEPTION, "Product not found for product id: " +productId);
+
+		}
+		log.debug("[{}][getProduct] -> response: {}", this.getClass().getSimpleName(), product);
+		return product;
 	}
 
 	@Override
