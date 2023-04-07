@@ -1,8 +1,10 @@
 package com.asc.productService.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import com.asc.productService.exception.exceptions.ProductAlreadyDeletedException;
 import com.asc.productService.exception.exceptions.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -57,21 +59,47 @@ public class ProductRepositoryServiceImpl implements IProductRepositoryService{
 	}
 
 	@Override
-	public List<Product> getProduct(Language language) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Product> getProducts(Language language) {
+		log.debug("[{}][getProducts]", this.getClass().getSimpleName());
+		List<Product> products = productRepository.getAllByDeletedFalse();
+		if (products.isEmpty()){
+			throw new ProductNotFoundException(language, FriendlyMessageCodes.PRODUCT_NOT_FOUND_EXCEPTION, "Products not found");
+		}
+		log.debug("[{}][getProducts] -> response: {}", this.getClass().getSimpleName(), products);
+		return products;
 	}
 
 	@Override
 	public Product updateProduct(Language language, Long productId, ProductUpdatedRequest productUpdatedRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		log.debug("[{}][updateProduct] -> request: {}", this.getClass().getSimpleName(), productUpdatedRequest);
+		Product product = getProduct(language, productId);
+		product.setProductName(productUpdatedRequest.getProductName());
+		product.setQuantity(productUpdatedRequest.getQuanity());
+		product.setPrice(productUpdatedRequest.getPrice());
+		product.setProductCreatedDate(product.getProductCreatedDate());
+		product.setProductUpdatedDate(new Date());
+		Product productResponse = productRepository.save(product);
+		log.debug("[{}][updateProduct] -> response: {}", this.getClass().getSimpleName(), productResponse);
+
+		return productResponse;
 	}
 
 	@Override
 	public Product deleteProduct(Language language, Long productId) {
-		// TODO Auto-generated method stub
-		return null;
+		log.debug("[{}][deleteProduct] -> request productId: {}", this.getClass().getSimpleName(), productId);
+		Product product;
+		try {
+			product = getProduct(language,productId);
+			product.setDeleted(true);
+			product.setProductUpdatedDate(new Date());
+			Product productResponse = productRepository.save(product);
+			log.debug("[{}][deleteProduct] -> response: {}", this.getClass().getSimpleName(), productResponse);
+			return productResponse;
+		}catch (ProductNotFoundException productNotFoundException){
+			throw new ProductAlreadyDeletedException(language, FriendlyMessageCodes.PRODUCT_ALREADY_DELETED, "Product already deleted product id:" +productId);
+		}
+
+
 	}
 
 }

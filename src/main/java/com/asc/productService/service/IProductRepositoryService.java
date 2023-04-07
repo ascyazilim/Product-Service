@@ -16,7 +16,7 @@ public interface IProductRepositoryService {
 	Product getProduct(Language language, Long productId);  
 	
 	//tüm kayıtları dönecek  method
-	List<Product> getProduct(Language language);  
+	List<Product> getProducts(Language language);
 	
 	//güncelleme
 	Product updateProduct(Language language, Long productId, ProductUpdatedRequest productUpdatedRequest);
